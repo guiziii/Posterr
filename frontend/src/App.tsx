@@ -1,33 +1,49 @@
-import { UserProvider, useUser } from "./contexts/UserContext";
-import { UserSelector } from "./components/UserSelector";
-import { PostFeed } from "./components/PostFeed";
-import "./App.css";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import { queryClient } from "./lib/queryClient";
+import theme from "./theme";
+import { UserProvider } from "./contexts/UserContext";
+import { useUser } from "./hooks/useUser";
+import { MainLayout } from "./components/templates/MainLayout";
+import { HomePage } from "./pages/HomePage";
 
 function AppContent() {
-  const { loading } = useUser();
+  const { isLoading } = useUser();
 
-  if (loading) {
-    return <div className="loading-screen">Loading Posterr...</div>;
+  if (isLoading) {
+    return (
+      <Box className="flex justify-center items-center h-screen">
+        <CircularProgress />
+        <Typography className="ml-3" variant="h6">
+          Loading Posterr...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Posterr</h1>
-        <UserSelector />
-      </header>
-      <main className="app-main">
-        <PostFeed />
-      </main>
-    </div>
+    <MainLayout>
+      <HomePage />
+    </MainLayout>
   );
 }
 
 function App() {
   return (
-    <UserProvider>
-      <AppContent />
-    </UserProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <UserProvider>
+          <AppContent />
+        </UserProvider>
+      </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
