@@ -14,11 +14,14 @@ A Twitter-like social media platform built as a Technical Assessment. Users can 
 ### Frontend
 - **Framework**: React 18 with TypeScript
 - **Build Tool**: Vite
-- **Styling**: Custom CSS (dark theme)
+- **UI Library**: Material UI (MUI)
+- **State Management**: TanStack Query (React Query) + React Context
+- **Architecture**: Atomic Design (atoms, molecules, organisms, templates, pages)
 
 ### Infrastructure
-- **Database**: Docker container (SQL Server)
+- **Database**: Docker container (SQL Server 2022)
 - **Containerization**: Docker Compose for full-stack deployment
+- **CI/CD**: GitHub Actions (lint, build, test)
 - **Testing**: xUnit with Moq
 
 ## Prerequisites
@@ -156,8 +159,15 @@ posterr/
 │   └── Posterr.Tests/            # Unit tests (xUnit + Moq)
 ├── frontend/                     # React + TypeScript SPA
 │   ├── src/
-│   │   ├── components/           # React components
-│   │   ├── contexts/             # UserContext (state management)
+│   │   ├── components/
+│   │   │   ├── atoms/            # CharCounter, RepostLabel
+│   │   │   ├── molecules/        # PostHeader, PostActions, SearchForm, SortControls
+│   │   │   ├── organisms/        # CreatePost, PostCard, PostFeed
+│   │   │   └── templates/        # MainLayout
+│   │   ├── contexts/             # UserContext (React Context)
+│   │   ├── hooks/                # Custom hooks (usePosts, useCreatePost, useRepost)
+│   │   ├── lib/                  # TanStack Query client config
+│   │   ├── pages/                # HomePage
 │   │   ├── services/             # API client
 │   │   └── types/                # TypeScript interfaces
 │   └── Dockerfile
@@ -171,6 +181,9 @@ posterr/
 - **Repository Pattern**: Database operations are separated from business logic (PostRepository, UserRepository), addressing the concern of "database operations handled at the use-case level."
 - **Users from API**: User data comes from the database via the API, not hardcoded IDs in the frontend.
 - **Early Return Pattern**: Used throughout to avoid nested conditionals and improve readability.
+- **Rate Limiting**: ASP.NET Core rate limiter middleware protects post creation endpoints from abuse, with proper 429 error responses.
+- **Atomic Design**: Frontend components are organized into atoms, molecules, organisms, templates, and pages for clear separation of concerns and reusability.
+- **TanStack Query**: Server state management with automatic caching, background refetching, and infinite scroll pagination via `useInfiniteQuery`.
 
 ---
 
