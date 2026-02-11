@@ -8,26 +8,30 @@ import { useUser } from "../../hooks/useUser";
 import { useCreatePost } from "../../hooks/useCreatePost";
 import { CharCounter } from "../atoms/CharCounter";
 import { ApiError } from "../../services/api";
-
-const MAX_LENGTH = 777;
+import { createPostSchema, MAX_POST_LENGTH } from "../../lib/schemas";
 
 export function CreatePost() {
   const { currentUser } = useUser();
   const [content, setContent] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
   const createPostMutation = useCreatePost();
 
   if (!currentUser) return null;
 
-  const remaining = MAX_LENGTH - content.length;
+  const remaining = MAX_POST_LENGTH - content.length;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
 
-    const trimmed = content.trim();
-    if (!trimmed) return;
+    const result = createPostSchema.safeParse({ content });
+    if (!result.success) {
+      setValidationError(result.error.issues[0].message);
+      return;
+    }
 
     createPostMutation.mutate(
-      { userId: currentUser.id, content: trimmed },
+      { userId: currentUser.id, content: result.data.content },
       { onSuccess: () => setContent("") }
     );
   };
@@ -39,8 +43,11 @@ export function CreatePost() {
           <TextField
             placeholder="What's happening?"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            inputProps={{ maxLength: MAX_LENGTH }}
+            onChange={(e) => {
+              setContent(e.target.value);
+              setValidationError(null);
+            }}
+            inputProps={{ maxLength: MAX_POST_LENGTH }}
             multiline
             rows={3}
             fullWidth
@@ -58,6 +65,11 @@ export function CreatePost() {
               {createPostMutation.isPending ? "Posting..." : "Post"}
             </Button>
           </div>
+          {validationError && (
+            <Alert severity="error" className="mt-2">
+              {validationError}
+            </Alert>
+          )}
           {createPostMutation.isError && (
             <Alert
               severity={createPostMutation.error instanceof ApiError && createPostMutation.error.status === 429 ? "warning" : "error"}
