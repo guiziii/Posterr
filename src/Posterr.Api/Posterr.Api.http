@@ -1,6 +1,32 @@
-@Posterr.Api_HostAddress = http://localhost:5205
+@host = http://localhost:5000
+@userId = 5f6851ac-6a80-4a96-95aa-8fb12d3652eb
 
-GET {{Posterr.Api_HostAddress}}/weatherforecast/
+### Get all users
+GET {{host}}/api/users
 Accept: application/json
 
-###
+### Get posts (latest)
+GET {{host}}/api/posts?page=1&limit=15&sort=latest
+Accept: application/json
+
+### Get posts (trending)
+GET {{host}}/api/posts?page=1&limit=15&sort=trending
+Accept: application/json
+
+### Search posts
+GET {{host}}/api/posts?page=1&limit=15&sort=latest&search=hello
+Accept: application/json
+
+### Create post
+POST {{host}}/api/posts
+Content-Type: application/json
+X-User-ID: {{userId}}
+
+{
+  "content": "Hello from Posterr!"
+}
+
+### Repost (replace {postId} with a real post ID)
+POST {{host}}/api/posts/{postId}/repost
+Content-Type: application/json
+X-User-ID: {{userId}}

@@ -5,14 +5,9 @@ using Posterr.Infrastructure.Data;
 
 namespace Posterr.Infrastructure.Repositories;
 
-public class PostRepository : IPostRepository
+public class PostRepository(AppDbContext context) : IPostRepository
 {
-    private readonly AppDbContext _context;
-
-    public PostRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<(List<Post> Posts, bool HasMore)> GetPostsAsync(int page, int limit, string sort, string? search)
     {
@@ -24,7 +19,7 @@ public class PostRepository : IPostRepository
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(p => p.OriginalPostId == null && p.Content.Contains(search));
+            query = query.Where(p => p.OriginalPostId == null && p.Content == search);
         }
 
         query = sort == "trending"
@@ -32,6 +27,7 @@ public class PostRepository : IPostRepository
             : query.OrderByDescending(p => p.CreatedAt);
 
         var totalAfterFilter = await query.CountAsync();
+
         var skip = (page - 1) * limit;
 
         var posts = await query
@@ -57,13 +53,16 @@ public class PostRepository : IPostRepository
     public async Task<Post> CreateAsync(Post post)
     {
         _context.Posts.Add(post);
+
         await _context.SaveChangesAsync();
+
         return post;
     }
 
     public async Task<int> GetUserPostCountTodayAsync(Guid userId)
     {
         var todayUtc = DateTime.UtcNow.Date;
+        
         return await _context.Posts
             .CountAsync(p => p.AuthorId == userId && p.CreatedAt >= todayUtc);
     }

@@ -4,19 +4,14 @@ using Posterr.Core.Interfaces;
 
 namespace Posterr.Core.Services;
 
-public class PostService : IPostService
+public class PostService(IPostRepository postRepository, IUserRepository userRepository) : IPostService
 {
     private const int MaxPostsPerDay = 5;
+    
     private const int MaxPostLength = 777;
 
-    private readonly IPostRepository _postRepository;
-    private readonly IUserRepository _userRepository;
-
-    public PostService(IPostRepository postRepository, IUserRepository userRepository)
-    {
-        _postRepository = postRepository;
-        _userRepository = userRepository;
-    }
+    private readonly IPostRepository _postRepository = postRepository;
+    private readonly IUserRepository _userRepository = userRepository;
 
     public async Task<PaginatedResponse<PostDto>> GetPostsAsync(int page, int limit, string sort, string? search)
     {
@@ -29,17 +24,13 @@ public class PostService : IPostService
 
     public async Task<PostDto> CreatePostAsync(Guid userId, string content)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
-        if (user is null)
-            throw new ArgumentException("User not found.");
+        var user = await _userRepository.GetByIdAsync(userId) ?? throw new ArgumentException("User not found.");
 
-        if (string.IsNullOrWhiteSpace(content))
-            throw new ArgumentException("Post content cannot be empty.");
-
-        if (content.Length > MaxPostLength)
-            throw new ArgumentException($"Post content cannot exceed {MaxPostLength} characters.");
+        if (string.IsNullOrWhiteSpace(content) || content.Length > MaxPostLength)
+            throw new ArgumentException("Post content cannot be empty or exceed 777 characters.");
 
         var todayCount = await _postRepository.GetUserPostCountTodayAsync(userId);
+        
         if (todayCount >= MaxPostsPerDay)
             throw new InvalidOperationException($"You have reached the daily limit of {MaxPostsPerDay} posts.");
 
@@ -52,6 +43,7 @@ public class PostService : IPostService
         };
 
         var created = await _postRepository.CreateAsync(post);
+        
         created.Author = user;
 
         return MapToDto(created);
@@ -59,13 +51,9 @@ public class PostService : IPostService
 
     public async Task<PostDto> RepostAsync(Guid userId, Guid postId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
-        if (user is null)
-            throw new ArgumentException("User not found.");
+        var user = await _userRepository.GetByIdAsync(userId) ?? throw new ArgumentException("User not found.");
 
-        var originalPost = await _postRepository.GetByIdAsync(postId);
-        if (originalPost is null)
-            throw new ArgumentException("Post not found.");
+        var originalPost = await _postRepository.GetByIdAsync(postId) ?? throw new ArgumentException("Post not found.");
 
         if (originalPost.IsRepost)
             throw new InvalidOperationException("Cannot repost a repost.");
@@ -74,10 +62,12 @@ public class PostService : IPostService
             throw new InvalidOperationException("Cannot repost your own post.");
 
         var alreadyReposted = await _postRepository.HasUserRepostedAsync(userId, postId);
+
         if (alreadyReposted)
             throw new InvalidOperationException("You have already reposted this post.");
 
         var todayCount = await _postRepository.GetUserPostCountTodayAsync(userId);
+
         if (todayCount >= MaxPostsPerDay)
             throw new InvalidOperationException($"You have reached the daily limit of {MaxPostsPerDay} posts.");
 
@@ -91,7 +81,9 @@ public class PostService : IPostService
         };
 
         var created = await _postRepository.CreateAsync(repost);
+
         created.Author = user;
+
         created.OriginalPost = originalPost;
 
         return MapToDto(created);

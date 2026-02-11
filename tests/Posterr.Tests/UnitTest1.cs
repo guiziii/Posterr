@@ -146,7 +146,7 @@ public class PostServiceTests
             Content = "My post",
             AuthorId = _testUser.Id,
             Author = _testUser,
-            Reposts = new List<Post>()
+            Reposts = []
         };
 
         _userRepoMock.Setup(r => r.GetByIdAsync(_testUser.Id)).ReturnsAsync(_testUser);
@@ -166,7 +166,7 @@ public class PostServiceTests
             Content = "Original",
             AuthorId = otherUser.Id,
             Author = otherUser,
-            Reposts = new List<Post>()
+            Reposts = []
         };
 
         _userRepoMock.Setup(r => r.GetByIdAsync(_testUser.Id)).ReturnsAsync(_testUser);
