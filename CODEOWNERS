@@ -1,0 +1,15 @@
+# Default owner for everything
+* @guilhermecruz
+
+# Backend (.NET)
+/src/ @guilhermecruz
+
+# Frontend (React)
+/frontend/ @guilhermecruz
+
+# Infrastructure / DevOps
+docker-compose.yml @guilhermecruz
+**/Dockerfile @guilhermecruz
+
+# CI/CD
+/.github/ @guilhermecruz

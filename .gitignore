@@ -1,27 +1,74 @@
-## .NET
-**/bin/
-**/obj/
-**/bin\*/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+## ========================================
+## OS
+## ========================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.lnk
 
-## Node
-node_modules/
-dist/
-
-## IDE
+## ========================================
+## IDE / Editors
+## ========================================
 .vs/
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+*.sublime-workspace
+*.sublime-project
 
-## OS
-.DS_Store
-Thumbs.db
+## ========================================
+## .NET
+## ========================================
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.nupkg
+*.snupkg
+project.lock.json
+*.nuget.props
+*.nuget.targets
+launchSettings.json
 
-## Environment
+## ========================================
+## Node / Frontend
+## ========================================
+node_modules/
+dist/
+.npm
+.eslintcache
+*.tsbuildinfo
+
+## ========================================
+## Environment / Secrets
+## ========================================
 .env
+.env.*
+!.env.example
 *.local
+appsettings.*.local.json
+
+## ========================================
+## Docker
+## ========================================
+docker-compose.override.yml
+
+## ========================================
+## Test / Coverage
+## ========================================
+coverage/
+TestResults/
+*.trx
+lcov.info
+
+## ========================================
+## Logs
+## ========================================
+logs/
+*.log
+npm-debug.log*
